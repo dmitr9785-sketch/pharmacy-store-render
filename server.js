@@ -58,18 +58,49 @@ app.use('/profile', profileRoutes);
 app.use('/reviews', reviewsRoutes);
 app.use('/promotions', promotionsRoutes);
 
+app.get('/debug', (req, res) => {
+  const hasDbUrl = !!process.env.DATABASE_URL;
+  const masked = process.env.DATABASE_URL ? process.env.DATABASE_URL.replace(/\/\/.*@/, '//***@') : 'не задан';
+  res.json({
+    DATABASE_URL: hasDbUrl, maskedUrl: masked, PORT: process.env.PORT, node: process.version,
+    hasSessionSecret: !!process.env.SESSION_SECRET,
+  });
+});
+
 app.use((req, res) => {
   res.status(404).render('404', { title: 'Страница не найдена' });
 });
 
 const PORT = process.env.PORT || 3000;
 
-sequelize.sync({ alter: true }).then(() => {
-  sessionStore.sync();
+async function start() {
+  let retries = 10;
+  while (retries > 0) {
+    try {
+      await sequelize.authenticate();
+      console.log('✓ База данных подключена');
+      break;
+    } catch (err) {
+      retries--;
+      console.log(`⏳ База не готова, осталось попыток: ${retries}`);
+      await new Promise(r => setTimeout(r, 5000));
+    }
+  }
+
+  if (retries === 0) {
+    console.error('Не удалось подключиться к БД после 10 попыток');
+    process.exit(1);
+  }
+
+  await sequelize.sync({ alter: true });
+  await sessionStore.sync();
   app.listen(PORT, () => {
-    console.log(`Сервер запущен на http://localhost:${PORT}`);
+    console.log(`Сервер запущен на порту ${PORT}`);
   });
   startOrderUpdater();
-}).catch(err => {
-  console.error('Ошибка подключения к БД:', err);
+}
+
+start().catch(err => {
+  console.error('Ошибка при запуске:', err);
+  process.exit(1);
 });

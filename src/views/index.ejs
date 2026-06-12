@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Аптека</title>
+  <link rel="stylesheet" href="/css/style.css">
+  
+  <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+  <style>
+    /* Базовые стили для секции карты */
+    .stores-section { margin: 40px 0; }
+    .stores-section h2 { margin-bottom: 20px; }
+    #map { width: 100%; height: 450px; border-radius: 8px; border: 1px solid #ddd; }
+  </style>
+</head>
+<body>
+  <%- include('partials/header') %>
+  <main class="container">
+    <section class="hero">
+      <h1>Аптека "Здоровье"</h1>
+      <p>Широкий ассортимент лекарственных средств и товаров для здоровья</p>
+    </section>
+
+    <section class="categories">
+      <h2>Категории</h2>
+      <div class="category-grid">
+        <% categories.forEach(cat => { %>
+          <a href="/catalog?category=<%= cat.id %>" class="category-card">
+            <%= cat.name %>
+          </a>
+        <% }) %>
+      </div>
+    </section>
+
+    <section class="products-section">
+      <h2>Новинки</h2>
+      <div class="product-grid">
+        <% products.forEach(product => { %>
+          <div class="product-card">
+            <a href="/catalog/<%= product.slug %>">
+              <div class="product-image">
+                <img src="/uploads/<%= product.imageUrl || product.image %>" alt="<%= product.name %>">
+              </div>
+              <h3><%= product.name %></h3>
+            </a>
+            <p class="product-manufacturer"><%= product.manufacturer %></p>
+            <p class="product-info"><%= product.dosage %>, <%= product.form %></p>
+            <p class="product-rating"><%- include('partials/rating', { rating: product.rating }) %></p>
+            <% if (product.requiresPrescription) { %>
+              <span class="badge badge-rx">По рецепту</span>
+            <% } else { %>
+              <span class="badge badge-otc">Без рецепта</span>
+            <% } %>
+            <p class="product-price">
+              <% if (product.oldPrice) { %>
+                <span class="old-price"><%= parseFloat(product.oldPrice).toFixed(0) %> ₽</span>
+                <span class="discount-badge">-<%= Math.round((1 - parseFloat(product.price) / parseFloat(product.oldPrice)) * 100) %>%</span>
+              <% } %>
+              <%= product.price %> ₽
+            </p>
+            <% if (product.stock > 0) { %>
+              <form action="/cart/add/<%= product.id %>" method="POST">
+                <button type="submit" class="btn btn-small">В корзину</button>
+              </form>
+            <% } else { %>
+              <p class="out-of-stock">Нет в наличии</p>
+            <% } %>
+          </div>
+        <% }) %>
+      </div>
+    </section>
+
+    <!-- НОВАЯ СЕКЦИЯ: Интерактивная карта аптек -->
+    <section class="stores-section">
+      <h2>Наши аптеки</h2>
+      <div id="map"></div>
+    </section>
+  </main>
+
+  <%- include('partials/footer') %>
+
+  <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const stores = <%- JSON.stringify(stores) %>;
+
+    const map = L.map('map').setView([55.7879, 49.1233], 11);
+
+    // Подгружаем бесплатные слои карт OpenStreetMap (OpenCage рекомендует именно их)
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: '© OpenStreetMap contributors'
+    }).addTo(map);
+
+    // Отображаем аптеки на карте, если у них есть координаты
+    if (stores.length > 0) {
+      const markers = [];
+
+      stores.forEach(store => {
+        const lat = parseFloat(store.lat);
+        const lng = parseFloat(store.lng);
+
+        if (!isNaN(lat) && !isNaN(lng)) {
+          const marker = L.marker([lat, lng])
+            .addTo(map)
+            .bindPopup(`<b>${store.name}</b><br>${store.address || 'Адрес не указан'}`);
+          
+          markers.push(marker);
+        }
+      });
+
+      // Автоматически масштабируем карту, чтобы были видны ВСЕ маркеры сразу
+      if (markers.length > 0) {
+        const group = new L.featureGroup(markers);
+        map.fitBounds(group.getBounds().pad(0.1));
+      }
+    }
+  </script>
+</body>
+</html>

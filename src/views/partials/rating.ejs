@@ -1,0 +1,9 @@
+<%
+  const r = parseFloat(rating) || 0;
+  const pct = (r / 5 * 100).toFixed(0);
+%>
+<span class="stars" style="position:relative;display:inline-block;">
+  <span style="color:#ddd;">★★★★★</span>
+  <span style="color:#f39c12;position:absolute;left:0;top:0;overflow:hidden;width:<%= pct %>%">★★★★★</span>
+</span>
+<span class="rating-value"><%= r.toFixed(1) %></span>

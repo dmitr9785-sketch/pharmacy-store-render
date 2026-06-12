@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Аптека</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="container">
+    <div class="product-detail">
+      <div class="product-detail-image">
+        <img src="/uploads/<%= product.imageUrl || product.image %>" alt="<%= product.name %>">
+      </div>
+      <div class="product-detail-info">
+        <h1><%= product.name %></h1>
+        <p class="manufacturer">Производитель: <strong><%= product.manufacturer %></strong></p>
+        <p class="product-rating rating-lg"><%- include('../partials/rating', { rating: product.rating }) %></p>
+        <p>Действующее вещество: <strong><%= product.activeIngredient %></strong></p>
+        <p>Дозировка: <strong><%= product.dosage %></strong></p>
+        <p>Форма выпуска: <strong><%= product.form %></strong></p>
+        <% if (product.requiresPrescription) { %>
+          <span class="badge badge-rx badge-lg">Отпускается по рецепту</span>
+        <% } else { %>
+          <span class="badge badge-otc badge-lg">Безрецептурный препарат</span>
+        <% } %>
+        <p class="price-lg">
+          <% if (product.oldPrice) { %>
+            <span class="old-price"><%= parseFloat(product.oldPrice).toFixed(0) %> ₽</span>
+            <span class="discount-badge" style="font-size:0.7em;vertical-align:middle">-<%= Math.round((1 - parseFloat(product.price) / parseFloat(product.oldPrice)) * 100) %>%</span>
+          <% } %>
+          <%= product.price %> ₽
+        </p>
+        <p class="stock-info">В наличии: <%= product.stock %> шт.</p>
+        <% if (product.stock > 0) { %>
+          <form action="/cart/add/<%= product.id %>" method="POST">
+            <div class="quantity-selector">
+              <label>Количество:</label>
+              <input type="number" name="quantity" value="1" min="1" max="<%= product.stock %>">
+            </div>
+            <button type="submit" class="btn btn-lg">Добавить в корзину</button>
+          </form>
+        <% } else { %>
+          <p class="out-of-stock" style="font-size:1.1em;margin:15px 0">Нет в наличии</p>
+        <% } %>
+        <div class="product-description">
+          <h3>Описание</h3>
+          <p><%= product.description %></p>
+        </div>
+        <p class="disclaimer">Имеются противопоказания. Необходима консультация специалиста.</p>
+      </div>
+    </div>
+
+    <% if (related.length > 0) { %>
+      <section class="products-section">
+        <h2>Похожие товары</h2>
+        <div class="product-grid">
+          <% related.forEach(p => { %>
+            <div class="product-card">
+              <a href="/catalog/<%= p.slug %>">
+                <div class="product-image"><img src="/uploads/<%= p.image %>" alt="<%= p.name %>"></div>
+                <h3><%= p.name %></h3>
+              </a>
+              <p class="product-manufacturer"><%= p.manufacturer %></p>
+              <p class="product-info"><%= p.dosage %>, <%= p.form %></p>
+              <p class="product-rating"><%- include('../partials/rating', { rating: p.rating }) %></p>
+              <% if (p.requiresPrescription) { %>
+                <span class="badge badge-rx">По рецепту</span>
+              <% } else { %>
+                <span class="badge badge-otc">Без рецепта</span>
+              <% } %>
+              <p class="product-price">
+                <% if (p.oldPrice) { %>
+                  <span class="old-price"><%= parseFloat(p.oldPrice).toFixed(0) %> ₽</span>
+                  <span class="discount-badge">-<%= Math.round((1 - parseFloat(p.price) / parseFloat(p.oldPrice)) * 100) %>%</span>
+                <% } %>
+                <%= p.price %> ₽
+              </p>
+            </div>
+          <% }) %>
+        </div>
+      </section>
+    <% } %>
+
+    <section class="reviews-section" id="reviews">
+      <h2>Отзывы <span class="reviews-count">(<%= reviews.length %>)</span></h2>
+
+      <% if (reviews.length === 0) { %>
+        <p class="empty">Пока нет отзывов. Будьте первым!</p>
+      <% } %>
+
+      <% reviews.forEach(r => { %>
+        <div class="review-card">
+          <div class="review-header">
+            <span class="review-author"><%= r.authorName %></span>
+            <span class="review-stars"><% for (let i = 1; i <= 5; i++) { %><span class="star <%= i <= r.rating ? 'filled' : '' %>">★</span><% } %></span>
+            <span class="review-date"><%= r.createdAt.toLocaleDateString('ru-RU') %></span>
+            <% if (user && (r.userId && r.userId === user.id || user.role === 'admin')) { %>
+              <form action="/reviews/<%= r.id %>/delete" method="POST" style="display:inline" onsubmit="return confirm('Удалить отзыв?')">
+                <button type="submit" class="btn-delete-review">✕</button>
+              </form>
+            <% } %>
+          </div>
+          <p class="review-text"><%= r.text %></p>
+        </div>
+      <% }) %>
+
+      <div class="review-form">
+        <h3>Оставить отзыв</h3>
+        <% if (user) { %>
+          <form action="/reviews/<%= product.id %>" method="POST">
+            <div class="form-group">
+              <label>Оценка</label>
+              <select name="rating" required>
+                <option value="5">5 — Отлично</option>
+                <option value="4">4 — Хорошо</option>
+                <option value="3">3 — Средне</option>
+                <option value="2">2 — Плохо</option>
+                <option value="1">1 — Ужасно</option>
+              </select>
+            </div>
+            <div class="form-group">
+              <label>Ваш отзыв <span class="char-counter">(<span id="charCount">0</span>/200)</span></label>
+              <textarea name="text" rows="4" required maxlength="200" oninput="document.getElementById('charCount').textContent = this.value.length"></textarea>
+            </div>
+            <button type="submit" class="btn">Отправить</button>
+          </form>
+        <% } else { %>
+          <p><a href="/auth/login">Войдите</a>, чтобы оставить отзыв.</p>
+        <% } %>
+      </div>
+    </section>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

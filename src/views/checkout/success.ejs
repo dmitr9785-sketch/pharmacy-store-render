@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Аптека</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="container">
+    <div class="success-page">
+      <h1>✅ Заказ оформлен!</h1>
+      <p>Номер заказа: <strong>№<%= order.id %></strong></p>
+      <p>Статус: <strong><%= order.status %></strong></p>
+      <% if (order.discount && order.discount > 0) { %>
+        <p>Скидка: <strong>-<%= order.discount %>%</strong> <span class="old-price"><%= originalTotal %> ₽</span></p>
+      <% } %>
+      <p>Сумма: <strong><%= order.total %> ₽</strong></p>
+      <% if (pointsUsed > 0) { %>
+        <p>Списано баллов: <strong><%= pointsUsed %></strong> (<%= (pointsUsed / 100).toFixed(2) %> ₽)</p>
+      <% } %>
+      <% if (pointsEarned > 0) { %>
+        <p>Начислено баллов: <strong>+<%= pointsEarned %></strong></p>
+      <% } %>
+      <p>Баланс баллов: <strong><%= pointsBalance %></strong> (<%= (pointsBalance / 100).toFixed(2) %> ₽)</p>
+      <% if (order.deliveryCost && order.deliveryCost > 0) { %>
+        <p>В том числе доставка: <strong><%= order.deliveryCost %> ₽</strong></p>
+      <% } else if (order.address && order.address.startsWith('Самовывоз:')) { %>
+        <p>Способ получения: <strong>самовывоз</strong></p>
+      <% } else { %>
+        <p>Доставка: <strong>бесплатно</strong></p>
+      <% } %>
+      <p>Адрес: <%= order.address %></p>
+      <p>Мы свяжемся с вами для подтверждения заказа.</p>
+      <a href="/" class="btn">На главную</a>
+    </div>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Админ-панель</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="container">
+    <h1><%= product ? 'Редактировать' : 'Новый' %> товар</h1>
+    <form method="POST" enctype="multipart/form-data" class="admin-form">
+      <div class="form-group">
+        <label>Название</label>
+        <input type="text" name="name" value="<%= product ? product.name : '' %>" required>
+      </div>
+      <div class="form-group">
+        <label>Slug (URL)</label>
+        <input type="text" name="slug" value="<%= product ? product.slug : '' %>">
+      </div>
+      <div class="form-group">
+        <label>Категория</label>
+        <select name="categoryId">
+          <% categories.forEach(cat => { %>
+            <option value="<%= cat.id %>" <%= product && product.categoryId === cat.id ? 'selected' : '' %>><%= cat.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Производитель</label>
+          <input type="text" name="manufacturer" value="<%= product ? product.manufacturer : '' %>">
+        </div>
+        <div class="form-group">
+          <label>Действующее вещество</label>
+          <input type="text" name="activeIngredient" value="<%= product ? product.activeIngredient : '' %>">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Дозировка</label>
+          <input type="text" name="dosage" value="<%= product ? product.dosage : '' %>" placeholder="500 мг">
+        </div>
+        <div class="form-group">
+          <label>Форма выпуска</label>
+          <select name="form">
+            <option value="таблетки" <%= product && product.form === 'таблетки' ? 'selected' : '' %>>Таблетки</option>
+            <option value="капсулы" <%= product && product.form === 'капсулы' ? 'selected' : '' %>>Капсулы</option>
+            <option value="мазь" <%= product && product.form === 'мазь' ? 'selected' : '' %>>Мазь</option>
+            <option value="гель" <%= product && product.form === 'гель' ? 'selected' : '' %>>Гель</option>
+            <option value="сироп" <%= product && product.form === 'сироп' ? 'selected' : '' %>>Сироп</option>
+            <option value="раствор" <%= product && product.form === 'раствор' ? 'selected' : '' %>>Раствор</option>
+            <option value="спрей" <%= product && product.form === 'спрей' ? 'selected' : '' %>>Спрей</option>
+            <option value="капли" <%= product && product.form === 'капли' ? 'selected' : '' %>>Капли</option>
+            <option value="порошок" <%= product && product.form === 'порошок' ? 'selected' : '' %>>Порошок</option>
+            <option value="свечи" <%= product && product.form === 'свечи' ? 'selected' : '' %>>Свечи</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Цена (₽)</label>
+          <input type="number" step="0.01" name="price" value="<%= product ? product.price : '' %>" required>
+        </div>
+        <div class="form-group">
+          <label>Количество</label>
+          <input type="number" name="stock" value="<%= product ? product.stock : '0' %>">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="requiresPrescription" <%= product && product.requiresPrescription ? 'checked' : '' %>>
+          Рецептурный препарат
+        </label>
+      </div>
+      <div class="form-group">
+        <label>Фото</label>
+        <input type="file" name="image" accept="image/*">
+        <% if (product && product.image !== 'default-product.png') { %>
+          <p>Текущее: <%= product.image %></p>
+        <% } %>
+      </div>
+      <div class="form-group">
+        <label>Описание</label>
+        <textarea name="description" rows="4"><%= product ? product.description : '' %></textarea>
+      </div>
+      <button type="submit" class="btn"><%= product ? 'Сохранить' : 'Создать' %></button>
+    </form>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

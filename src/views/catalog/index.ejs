@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Аптека</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="container">
+    <h1>Каталог</h1>
+
+    <form class="filters" method="GET" action="/catalog">
+      <div class="filter-group">
+        <input type="text" name="search" placeholder="Поиск по названию..." value="<%= query.search || '' %>">
+      </div>
+      <div class="filter-group">
+        <select name="category">
+          <option value="">Все категории</option>
+          <% categories.forEach(cat => { %>
+            <option value="<%= cat.id %>" <%= String(query.category) === String(cat.id) ? 'selected' : '' %>><%= cat.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="filter-group">
+        <select name="prescription">
+          <option value="">Все</option>
+          <option value="otc" <%= query.prescription === 'otc' ? 'selected' : '' %>>Без рецепта</option>
+          <option value="rx" <%= query.prescription === 'rx' ? 'selected' : '' %>>По рецепту</option>
+        </select>
+      </div>
+      <button type="submit" class="btn">Найти</button>
+    </form>
+
+    <div class="product-grid">
+      <% if (products.length === 0) { %>
+        <p class="empty">Товаров не найдено</p>
+      <% } %>
+      <% products.forEach(product => { %>
+        <div class="product-card">
+          <a href="/catalog/<%= product.slug %>">
+            <div class="product-image">
+              <img src="/uploads/<%= product.imageUrl || product.image %>" alt="<%= product.name %>">
+            </div>
+            <h3><%= product.name %></h3>
+          </a>
+          <p class="product-manufacturer"><%= product.manufacturer %></p>
+          <p class="product-info"><%= product.dosage %>, <%= product.form %></p>
+          <p class="product-rating"><%- include('../partials/rating', { rating: product.rating }) %></p>
+          <% if (product.requiresPrescription) { %>
+            <span class="badge badge-rx">По рецепту</span>
+          <% } else { %>
+            <span class="badge badge-otc">Без рецепта</span>
+          <% } %>
+          <p class="product-price">
+            <% if (product.oldPrice) { %>
+              <span class="old-price"><%= parseFloat(product.oldPrice).toFixed(0) %> ₽</span>
+              <span class="discount-badge">-<%= Math.round((1 - parseFloat(product.price) / parseFloat(product.oldPrice)) * 100) %>%</span>
+            <% } %>
+            <%= product.price %> ₽ <span class="stock">(<%= product.stock %> шт.)</span>
+          </p>
+          <% if (product.stock > 0) { %>
+            <form action="/cart/add/<%= product.id %>" method="POST">
+              <button type="submit" class="btn btn-small">В корзину</button>
+            </form>
+          <% } else { %>
+            <p class="out-of-stock">Нет в наличии</p>
+          <% } %>
+        </div>
+      <% }) %>
+    </div>
+
+    <% if (totalPages > 1) { %>
+      <div class="pagination">
+        <% if (currentPage > 1) { %>
+          <a href="?<%= qs.stringify(Object.assign({}, query, { page: currentPage - 1 })) %>" class="page-link">←</a>
+        <% } %>
+        <% for (let p = 1; p <= totalPages; p++) { %>
+          <a href="?<%= qs.stringify(Object.assign({}, query, { page: p })) %>" class="page-link <%= p === currentPage ? 'active' : '' %>"><%= p %></a>
+        <% } %>
+        <% if (currentPage < totalPages) { %>
+          <a href="?<%= qs.stringify(Object.assign({}, query, { page: currentPage + 1 })) %>" class="page-link">→</a>
+        <% } %>
+      </div>
+    <% } %>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

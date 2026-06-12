@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Аптека</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="container">
+    <h1>Корзина</h1>
+    <% if (locals.error) { %>
+      <p class="error-msg"><%= error %></p>
+    <% } %>
+    <% if (items.length === 0) { %>
+      <p class="empty">Корзина пуста</p>
+      <a href="/catalog" class="btn">Перейти в каталог</a>
+    <% } else { %>
+      <div class="cart-items">
+        <% items.forEach(item => { %>
+          <% if (item.product) { %>
+            <div class="cart-item">
+              <div class="cart-item-image">
+                <img src="/uploads/<%= item.product.imageUrl || item.product.image %>" alt="<%= item.product.name %>">
+              </div>
+              <div class="cart-item-info">
+                <h3><%= item.product.name %></h3>
+                <p><%= item.product.dosage %>, <%= item.product.form %></p>
+                <p>
+                  <% if (item.product.oldPrice) { %>
+                    <span class="old-price"><%= parseFloat(item.product.oldPrice).toFixed(0) %> ₽</span>
+                  <% } %>
+                  <%= item.product.price %> ₽
+                </p>
+              </div>
+              <form action="/cart/update/<%= item.productId %>" method="POST" class="cart-item-qty">
+                <input type="number" name="quantity" value="<%= item.quantity %>" min="0" max="<%= item.product.stock %>">
+                <button type="submit" class="btn btn-small">Обновить</button>
+              </form>
+              <div class="cart-item-total">
+                <%= (parseFloat(item.product.price) * item.quantity).toFixed(2) %> ₽
+              </div>
+              <form action="/cart/remove/<%= item.productId %>" method="POST">
+                <button type="submit" class="btn btn-danger btn-small">Удалить</button>
+              </form>
+            </div>
+          <% } %>
+        <% }) %>
+      </div>
+      <div class="cart-total">
+        <strong>Итого: <%= total.toFixed(2) %> ₽</strong>
+        <a href="/checkout" class="btn btn-lg">Оформить заказ</a>
+      </div>
+    <% } %>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

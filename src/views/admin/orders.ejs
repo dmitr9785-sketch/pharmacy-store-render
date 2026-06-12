@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Админ-панель</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="container">
+    <h1>Заказы</h1>
+    <table class="admin-table">
+      <thead>
+        <tr>
+          <th>№</th>
+          <th>Клиент</th>
+          <th>Товары</th>
+          <th>Сумма</th>
+          <th>Статус</th>
+          <th>Дата</th>
+          <th>Действие</th>
+        </tr>
+      </thead>
+      <tbody>
+        <% orders.forEach(order => { %>
+          <tr>
+            <td><%= order.id %></td>
+            <td><%= order.phone %><br><%= order.address %></td>
+            <td>
+              <% order.OrderItems.forEach(oi => { %>
+                <%= oi.Product ? oi.Product.name : '—' %> x<%= oi.quantity %><br>
+              <% }) %>
+            </td>
+            <td><%= order.total %> ₽<br><% if (order.deliveryCost && order.deliveryCost > 0) { %>+ доставка <%= order.deliveryCost %> ₽<% } %><% if (order.pointsUsed > 0) { %><br>-<%= order.pointsUsed %> баллов<% } %></td>
+            <td><%= order.status %></td>
+            <td><%= order.createdAt.toLocaleDateString('ru-RU') %></td>
+            <td>
+              <form method="POST" action="/admin/orders/<%= order.id %>/status">
+                <select name="status">
+                  <option value="новый" <%= order.status === 'новый' ? 'selected' : '' %>>Новый</option>
+                  <option value="подтверждён" <%= order.status === 'подтверждён' ? 'selected' : '' %>>Подтверждён</option>
+                  <option value="собран" <%= order.status === 'собран' ? 'selected' : '' %>>Собран</option>
+                  <option value="готов к выдаче" <%= order.status === 'готов к выдаче' ? 'selected' : '' %>>Готов к выдаче</option>
+                  <option value="завершён" <%= order.status === 'завершён' ? 'selected' : '' %>>Завершён</option>
+                  <option value="отменён" <%= order.status === 'отменён' ? 'selected' : '' %>>Отменён</option>
+                </select>
+                <button type="submit" class="btn btn-small">Обновить</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

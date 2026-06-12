@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Админ-панель</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="container">
+    <div class="admin-header">
+      <h1>Аптеки на карте</h1>
+    </div>
+
+    <h2>Добавить аптеку</h2>
+    <form method="POST" class="admin-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Название</label>
+          <input type="text" name="name" required>
+        </div>
+        <div class="form-group">
+          <label>Адрес</label>
+          <input type="text" name="address" required>
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Широта (lat)</label>
+          <input type="text" name="lat" step="any" required placeholder="55.7558">
+        </div>
+        <div class="form-group">
+          <label>Долгота (lng)</label>
+          <input type="text" name="lng" step="any" required placeholder="37.6173">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Телефон</label>
+          <input type="text" name="phone">
+        </div>
+        <div class="form-group">
+          <label>Часы работы</label>
+          <input type="text" name="workingHours" placeholder="пн-пт 8:00-22:00">
+        </div>
+      </div>
+      <button type="submit" class="btn">Добавить</button>
+    </form>
+
+    <h2>Список аптек</h2>
+    <table class="admin-table">
+      <thead>
+        <tr><th>Название</th><th>Адрес</th><th>Координаты</th><th>Действия</th></tr>
+      </thead>
+      <tbody>
+        <% stores.forEach(s => { %>
+          <tr>
+            <td><%= s.name %></td>
+            <td><%= s.address %></td>
+            <td><%= s.lat %>, <%= s.lng %></td>
+            <td>
+              <form action="/admin/stores/<%= s.id %>/delete" method="POST" style="display:inline">
+                <button type="submit" class="btn btn-small btn-danger" onclick="return confirm('Удалить?')">🗑</button>
+              </form>
+            </td>
+          </tr>
+        <% }) %>
+      </tbody>
+    </table>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

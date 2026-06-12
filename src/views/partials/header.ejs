@@ -1,0 +1,29 @@
+<header class="site-header">
+  <div class="container header-inner">
+    <a href="/" class="logo">💊 Аптека "Здоровье"</a>
+    <form action="/catalog" method="GET" class="header-search">
+      <input type="text" name="search" placeholder="Поиск..." value="">
+      <button type="submit">🔍</button>
+    </form>
+    <nav>
+      <a href="/catalog">Каталог</a>
+      <a href="/promotions">Акции</a>
+      <a href="/stores">Аптеки на карте</a>
+      <a href="/about">О нас</a>
+      <% if (user) { %>
+        <a href="/cart">Корзина (<%= cartCount %>)</a>
+        <% if (user.role === 'admin') { %>
+          <a href="/admin">Админка</a>
+        <% } %>
+        <a href="/profile" class="user-name"><%= user.name %></a>
+        <form action="/auth/logout" method="POST" style="display:inline">
+          <button type="submit" class="btn-link">Выйти</button>
+        </form>
+      <% } else { %>
+        <a href="/cart">Корзина (<%= cartCount %>)</a>
+        <a href="/auth/login">Войти</a>
+        <a href="/auth/register">Регистрация</a>
+      <% } %>
+    </nav>
+  </div>
+</header>

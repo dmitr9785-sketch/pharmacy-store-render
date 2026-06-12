@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Аптека</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="container">
+    <h1>Оформление заказа</h1>
+    <form method="POST" class="checkout-form">
+      <div class="form-group">
+        <label>Телефон для связи</label>
+        <input type="tel" name="phone" required>
+      </div>
+
+      <% if (hasPrescription) { %>
+        <div class="form-group">
+          <p class="disclaimer">В вашем заказе есть рецептурные препараты — только самовывоз из аптеки.</p>
+        </div>
+        <div class="form-group">
+          <label>Аптека для самовывоза</label>
+          <select name="storeId" required>
+            <option value="">— Выберите аптеку —</option>
+            <% stores.forEach(s => { %>
+              <option value="<%= s.id %>"><%= s.name %> — <%= s.address %></option>
+            <% }) %>
+          </select>
+        </div>
+      <% } else { %>
+        <div class="delivery-methods">
+          <label class="delivery-radio">
+            <input type="radio" name="deliveryMethod" value="delivery" checked onchange="toggleDelivery()">
+            <span class="radio-label">🚚 Доставка (250 ₽)</span>
+          </label>
+          <label class="delivery-radio">
+            <input type="radio" name="deliveryMethod" value="pickup" onchange="toggleDelivery()">
+            <span class="radio-label">🏪 Самовывоз из аптеки (бесплатно)</span>
+          </label>
+        </div>
+
+        <div id="delivery-fields">
+          <div class="form-group">
+            <label>Адрес доставки</label>
+            <input type="text" name="address" placeholder="г. Казань, ул. Ленина, д. 10, кв. 5" required>
+          </div>
+          <div class="delivery-info">
+            <p><strong>Доставка:</strong> 250 ₽</p>
+            <% if (cartTotal >= 2000) { %>
+              <p class="delivery-free">Бесплатная доставка при заказе от 2 000 ₽ — доставка бесплатно!</p>
+            <% } else { %>
+              <p>Бесплатно при заказе от 2 000 ₽ (ещё <strong><%= (2000 - cartTotal).toLocaleString('ru-RU') %> ₽</strong>)</p>
+            <% } %>
+          </div>
+        </div>
+
+        <div id="pickup-fields" style="display:none">
+          <div class="form-group">
+            <label>Аптека для самовывоза</label>
+            <select name="storeId">
+              <option value="">— Выберите аптеку —</option>
+              <% stores.forEach(s => { %>
+                <option value="<%= s.id %>"><%= s.name %> — <%= s.address %></option>
+              <% }) %>
+            </select>
+          </div>
+        </div>
+      <% } %>
+
+      <div class="form-group">
+        <label>Промокод</label>
+        <input type="text" name="promoCode" placeholder="Введите промокод" maxlength="20">
+        <% if (typeof promoError !== 'undefined' && promoError) { %>
+          <p class="promo-error"><%= promoError %></p>
+        <% } %>
+      </div>
+
+      <div class="points-section">
+        <p><strong>Ваши бонусные баллы:</strong> <%= userPoints %></p>
+        <p class="points-hint">100 баллов = 1 ₽. Можно оплатить до 90% заказа. Баллы начисляются после оформления.</p>
+        <div class="form-group">
+          <label>Списать баллы</label>
+          <input type="number" name="pointsToUse" placeholder="0" min="0" max="<%= userPoints %>">
+        </div>
+      </div>
+
+      <p class="disclaimer">Имеются противопоказания. Необходима консультация специалиста.</p>
+      <button type="submit" class="btn btn-lg">Подтвердить заказ</button>
+    </form>
+  </main>
+
+  <script>
+    function toggleDelivery() {
+      const method = document.querySelector('input[name="deliveryMethod"]:checked').value;
+      document.getElementById('delivery-fields').style.display = method === 'delivery' ? '' : 'none';
+      document.getElementById('pickup-fields').style.display = method === 'pickup' ? '' : 'none';
+      const addr = document.querySelector('[name="address"]');
+      const store = document.querySelector('[name="storeId"]');
+      if (addr) addr.required = method === 'delivery';
+      if (store) store.required = method === 'pickup';
+    }
+  </script>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

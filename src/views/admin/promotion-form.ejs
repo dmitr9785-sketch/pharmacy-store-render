@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Админ-панель</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="container">
+    <h1><%= promotion ? 'Редактировать акцию' : 'Новая акция' %></h1>
+    <form method="POST" class="admin-form">
+      <div class="form-row">
+        <div class="form-group">
+          <label>Название *</label>
+          <input type="text" name="title" required value="<%= promotion ? promotion.title : '' %>">
+        </div>
+        <div class="form-group">
+          <label>Текст на бейдже</label>
+          <input type="text" name="badgeText" value="<%= promotion ? promotion.badgeText : '' %>" placeholder="-10%">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Описание</label>
+        <textarea name="description" rows="3"><%= promotion ? promotion.description : '' %></textarea>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>Процент скидки</label>
+          <input type="number" name="discountPercent" value="<%= promotion ? promotion.discountPercent : 0 %>" min="0" max="100">
+        </div>
+        <div class="form-group">
+          <label>Порядок сортировки</label>
+          <input type="number" name="sortOrder" value="<%= promotion ? promotion.sortOrder : 0 %>">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="form-group">
+          <label>
+            <input type="checkbox" name="requiresPromoCode" <%= promotion && promotion.requiresPromoCode ? 'checked' : '' %>>
+            Требуется промокод
+          </label>
+        </div>
+        <div class="form-group">
+          <label>Промокод</label>
+          <input type="text" name="promoCode" value="<%= promotion ? promotion.promoCode : '' %>" maxlength="20" style="text-transform:uppercase">
+        </div>
+      </div>
+      <div class="form-group">
+        <label>Лимит использований промокода (0 = без лимита)</label>
+        <input type="number" name="maxUses" value="<%= promotion ? (promotion.maxUses || 0) : 1 %>" min="0">
+      </div>
+      <div class="form-group">
+        <label>Условия акции</label>
+        <textarea name="requirements" rows="2"><%= promotion ? promotion.requirements : '' %></textarea>
+      </div>
+      <div class="form-group">
+        <label>Применить скидку только к категории (оставьте пустым — на весь заказ)</label>
+        <select name="applicableCategoryId">
+          <option value="">— Все товары —</option>
+          <% categories.forEach(c => { %>
+            <option value="<%= c.id %>" <%= promotion && promotion.applicableCategoryId == c.id ? 'selected' : '' %>><%= c.name %></option>
+          <% }) %>
+        </select>
+      </div>
+      <div class="form-group">
+        <label>
+          <input type="checkbox" name="isActive" <%= !promotion || promotion.isActive ? 'checked' : '' %>>
+          Активна
+        </label>
+      </div>
+      <button type="submit" class="btn"><%= promotion ? 'Сохранить' : 'Создать' %></button>
+      <a href="/admin/promotions" class="btn btn-secondary">Отмена</a>
+    </form>
+  </main>
+  <%- include('../partials/footer') %>
+</body>
+</html>

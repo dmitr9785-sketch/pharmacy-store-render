@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Аптека</title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="container">
+    <h1>Личный кабинет</h1>
+    <p><strong>Email:</strong> <%= locals.user ? user.email : '' %></p>
+    <p><strong>Бонусные баллы:</strong> <%= userPoints %></p>
+
+    <div class="profile-tabs">
+      <button class="tab-btn active" onclick="switchTab('active')">Активные заказы (<%= activeOrders.length %>)</button>
+      <button class="tab-btn" onclick="switchTab('history')">История заказов (<%= historyOrders.length %>)</button>
+    </div>
+
+    <div id="tab-active" class="tab-content">
+      <% if (activeOrders.length === 0) { %>
+        <p>Нет активных заказов.</p>
+      <% } else { %>
+        <% activeOrders.forEach(order => { %>
+          <div class="order-card">
+            <div class="order-header">
+              <span>Заказ №<%= order.id %></span>
+              <span class="order-date"><%= order.createdAt.toLocaleDateString('ru-RU') %></span>
+              <span class="order-total"><%= parseFloat(order.total).toFixed(2) %> ₽</span>
+              <span class="order-status"><%= order.status %></span>
+              <% if (order.pointsUsed > 0) { %><span class="order-points">-<%= order.pointsUsed %> баллов</span><% } %>
+            </div>
+            <div class="order-tracking">
+              <%
+                const isPickup = order.address && order.address.startsWith('Самовывоз:');
+                const steps = isPickup
+                  ? ['Оформлен', 'Подтверждён', 'Собран', 'Готов к выдаче', 'Получен']
+                  : ['Оформлен', 'Подтверждён', 'Собран', 'В пути', 'Доставлен'];
+                const statusMap = { 'новый': 0, 'подтверждён': 1, 'собран': 2, 'готов к выдаче': 3, 'завершён': 4, 'отменён': -1 };
+                const currentStep = statusMap[order.status] !== undefined ? statusMap[order.status] : -1;
+                const progress = order.progress !== undefined ? order.progress : 0;
+                const currentStepProgress = Math.min((progress * steps.length - currentStep) * 100, 100);
+              %>
+              <div class="tracking-bar-large">
+                <div class="tracking-bar-fill" style="width:<%= Math.min(progress * 100, 100) %>%"></div>
+              </div>
+              <div class="tracking-steps">
+                <% steps.forEach((label, i) => { %>
+                  <div class="track-step <%= i < currentStep ? 'done' : (i === currentStep ? 'active' : '') %>">
+                    <div class="step-dot"><%= i < currentStep ? '✓' : (i === currentStep ? '●' : '○') %></div>
+                    <div class="step-label"><%= label %></div>
+                  </div>
+                <% }) %>
+              </div>
+            </div>
+            <table class="order-items">
+              <thead>
+                <tr><th>Товар</th><th>Цена</th><th>Кол-во</th><th>Сумма</th></tr>
+              </thead>
+              <tbody>
+                <% (order.OrderItems || []).forEach(item => { %>
+                  <tr>
+                    <td><%= item.Product ? item.Product.name : 'Товар удалён' %></td>
+                    <td><%= parseFloat(item.price).toFixed(2) %> ₽</td>
+                    <td><%= item.quantity %></td>
+                    <td><%= (parseFloat(item.price) * item.quantity).toFixed(2) %> ₽</td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+            <% if (order.status === 'новый' || order.status === 'подтверждён') { %>
+              <div class="order-actions">
+                <form action="/profile/<%= order.id %>/cancel" method="POST" onsubmit="return confirm('Отменить заказ №<%= order.id %>?')">
+                  <button type="submit" class="btn btn-small btn-danger">Отменить заказ</button>
+                </form>
+              </div>
+            <% } %>
+            <% if (order.status === 'собран' || order.status === 'готов к выдаче') { %>
+              <div class="order-actions">
+                <form action="/profile/<%= order.id %>/received" method="POST">
+                  <button type="submit" class="btn btn-small">✓ Заказ получен</button>
+                </form>
+              </div>
+            <% } %>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <div id="tab-history" class="tab-content" style="display:none">
+      <% if (historyOrders.length === 0) { %>
+        <p>История заказов пуста.</p>
+      <% } else { %>
+        <% historyOrders.forEach(order => { %>
+          <div class="order-card">
+            <div class="order-header">
+              <span>Заказ №<%= order.id %></span>
+              <span class="order-date"><%= order.createdAt.toLocaleDateString('ru-RU') %></span>
+              <span class="order-total"><%= parseFloat(order.total).toFixed(2) %> ₽</span>
+              <span class="order-status"><%= order.status %></span>
+              <% if (order.pointsUsed > 0) { %><span class="order-points">-<%= order.pointsUsed %> баллов</span><% } %>
+              <% if (order.pointsEarned > 0) { %><span class="order-points">+<%= order.pointsEarned %> баллов</span><% } %>
+            </div>
+            <table class="order-items">
+              <thead>
+                <tr><th>Товар</th><th>Цена</th><th>Кол-во</th><th>Сумма</th></tr>
+              </thead>
+              <tbody>
+                <% (order.OrderItems || []).forEach(item => { %>
+                  <tr>
+                    <td><%= item.Product ? item.Product.name : 'Товар удалён' %></td>
+                    <td><%= parseFloat(item.price).toFixed(2) %> ₽</td>
+                    <td><%= item.quantity %></td>
+                    <td><%= (parseFloat(item.price) * item.quantity).toFixed(2) %> ₽</td>
+                  </tr>
+                <% }) %>
+              </tbody>
+            </table>
+          </div>
+        <% }) %>
+      <% } %>
+    </div>
+
+    <a href="/catalog" class="btn">В каталог</a>
+  </main>
+
+  <script>
+    function switchTab(tab) {
+      document.querySelectorAll('.tab-content').forEach(el => el.style.display = 'none');
+      document.querySelectorAll('.tab-btn').forEach(el => el.classList.remove('active'));
+      document.getElementById('tab-' + tab).style.display = '';
+      document.querySelector('.tab-btn[onclick*="' + tab + '"]').classList.add('active');
+    }
+  </script>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title %> - Аптека</title>
+  <link rel="stylesheet" href="/css/style.css" />
+  <style>
+    .about-page { max-width: 1000px; }
+    .about-section { margin-bottom: 40px; }
+    .about-section p { line-height: 1.7; color: #555; }
+    .about-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 20px; margin: 20px 0; }
+    .about-card { background: #fff; padding: 20px; border-radius: 10px; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
+    .about-card h3 { font-size: 1.1em; color: #1b5e20; margin-bottom: 8px; }
+    .about-card p { font-size: 0.93em; color: #666; line-height: 1.5; }
+    .about-icon { font-size: 1.5em; margin-bottom: 8px; }
+    .contacts-grid .about-card { text-align: center; }
+
+  </style>
+</head>
+<body>
+  <%- include('../partials/header') %>
+  <main class="container about-page">
+    <h1>О нас</h1>
+
+    <section class="about-section">
+      <h2>Интернет-аптека «Здоровье»</h2>
+      <p>Мы — современная интернет-аптека, работающая в Казани с 2020 года. Наша цель — сделать лекарства и товары для здоровья доступными каждому. Мы предлагаем широкий ассортимент препаратов по низким ценам с быстрой доставкой.</p>
+    </section>
+
+    <section class="about-section">
+      <h2>Наши преимущества</h2>
+      <div class="about-grid">
+        <div class="about-card">
+          <div class="about-icon">✓</div>
+          <h3>Сертифицированные товары</h3>
+          <p>Вся продукция имеет сертификаты соответствия и лицензии.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">✓</div>
+          <h3>Низкие цены</h3>
+          <p>Мы работаем напрямую с производителями и предлагаем лучшие цены.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">✓</div>
+          <h3>Быстрая доставка</h3>
+          <p>Доставляем заказы по Казани в день оформления.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">✓</div>
+          <h3>Квалифицированные фармацевты</h3>
+          <p>Наши сотрудники с радостью помогут с выбором препаратов.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">✓</div>
+          <h3>Удобный самовывоз</h3>
+          <p>12 аптек по всему городу — забирайте заказ в ближайшей.</p>
+        </div>
+        <div class="about-card">
+          <div class="about-icon">✓</div>
+          <h3>Бонусная программа</h3>
+          <p>Копите баллы с каждой покупки и оплачивайте до 50% заказа.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="about-section">
+      <h2>Лицензии и документы</h2>
+      <p>Аптека «Здоровье» работает на основании лицензии № ЛО-16-02-003456 от 15.03.2020, выданной Министерством здравоохранения Республики Татарстан. Все сотрудники имеют высшее фармацевтическое образование.</p>
+    </section>
+
+    <section class="about-section">
+      <h2>Контакты</h2>
+      <div class="about-grid contacts-grid">
+        <div class="about-card">
+          <h3>Телефон</h3>
+          <p>+7 (843) 200-00-01<br>ежедневно с 8:00 до 22:00</p>
+        </div>
+        <div class="about-card">
+          <h3>Email</h3>
+          <p>info@zdorovie-apteka.ru</p>
+        </div>
+        <div class="about-card">
+          <h3>Адрес центрального офиса</h3>
+          <p>г. Казань, ул. Баумана, 44</p>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <%- include('../partials/footer') %>
+</body>
+</html>

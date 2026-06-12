@@ -130,7 +130,7 @@ router.post('/', requireAuth, async (req, res) => {
   user.points = user.points - pointsUsed + pointsEarned;
   await user.save();
 
-  req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role };
+  req.session.user = { id: user.id, name: user.name, email: user.email, role: user.role, points: user.points };
 
   req.session.cart = [];
   res.render('checkout/success', { title: 'Заказ оформлен', order, discount, originalTotal: total.toFixed(2), deliveryCost, pointsUsed, pointsEarned, pointsBalance: user.points });

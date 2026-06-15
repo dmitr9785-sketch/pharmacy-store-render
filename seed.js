@@ -220,11 +220,13 @@ async function seed() {
     console.log('✓ Акции загружены');
 
     console.log('\n✅ База данных успешно заполнена!');
-    process.exit(0);
   } catch (err) {
     console.error('Ошибка:', err);
-    process.exit(1);
   }
 }
 
-seed();
+if (require.main === module) {
+  seed().then(() => process.exit(0));
+}
+
+module.exports = seed;

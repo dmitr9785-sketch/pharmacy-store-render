@@ -6,6 +6,7 @@ require('dotenv').config({ path: path.join(__dirname, '.env') });
 
 const { sequelize } = require('./src/models');
 const { startOrderUpdater } = require('./src/orderUpdater');
+const seed = require('./seed');
 
 const SequelizeStore = require('connect-session-sequelize')(session.Store);
 
@@ -94,6 +95,7 @@ async function start() {
 
   await sequelize.sync({ alter: true });
   await sessionStore.sync();
+  await seed();
   app.listen(PORT, () => {
     console.log(`Сервер запущен на порту ${PORT}`);
   });

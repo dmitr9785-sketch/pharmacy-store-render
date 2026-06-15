@@ -10,7 +10,7 @@
   <%- include('../partials/header') %>
   <main class="container">
     <h1><%= product ? 'Редактировать' : 'Новый' %> товар</h1>
-    <form method="POST" enctype="multipart/form-data" class="admin-form">
+    <form method="POST" enctype="multipart/form-data" class="admin-form" action="<%= product ? '/admin/products/' + product.id : '/admin/products' %>">
       <div class="form-group">
         <label>Название</label>
         <input type="text" name="name" value="<%= product ? product.name : '' %>" required>
